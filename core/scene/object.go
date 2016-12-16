@@ -2,7 +2,8 @@ package scene
 
 
 type Object interface {
-	Faces() *Faces
+	AddVertex(vertices ...Vector)
+	AddPolygon(indexes ...int)
 	Normalize()
 }
 

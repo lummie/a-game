@@ -2,19 +2,20 @@ package scene
 
 
 type Scene struct {
-	Objects Objects
-
+	Meshes              Meshes
+	WorldTransformation Matrix
 }
 
 // NewScene creates a new scene
 func NewScene(c int) *Scene {
 	s := Scene{
-		Objects:make([]Object,0,c),
+		Meshes:make(Meshes, 0, c),
+		WorldTransformation: NewScale(Vector{1.0, 1.0, 1.0}),
 	}
 	return &s
 }
 
-func (s *Scene) AddObject(o Object) {
-	s.Objects = append(s.Objects, o)
+func (s *Scene) AddMesh(m *Mesh) {
+	s.Meshes = append(s.Meshes, m)
 }
 

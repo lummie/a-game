@@ -9,7 +9,8 @@ type Matrix struct {
 	x30, x31, x32, x33 float64
 }
 
-func MatrixIdentity() Matrix {
+// NewIdentity returns a new Identity Matrix
+func NewIdentity() Matrix {
 	return Matrix{
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -17,7 +18,8 @@ func MatrixIdentity() Matrix {
 		0, 0, 0, 1}
 }
 
-func MatrixTranslate(v Vertex) Matrix {
+// NewTranslate returns a new Translation Matrix for the translation vector passed in
+func NewTranslate(v Vector) Matrix {
 	return Matrix{
 		1, 0, 0, v.X,
 		0, 1, 0, v.Y,
@@ -25,15 +27,16 @@ func MatrixTranslate(v Vertex) Matrix {
 		0, 0, 0, 1}
 }
 
-func MatrixScale(v Vertex) Matrix {
+// NewScale returns a Scale Matrix for the scale vector passed in
+func NewScale(v Vector) Matrix {
 	return Matrix{
 		v.X, 0, 0, 0,
 		0, v.Y, 0, 0,
 		0, 0, v.Z, 0,
 		0, 0, 0, 1}
 }
-
-func MatrixRotate(v Vertex, a float64) Matrix {
+// NewRotate returns a rotation matrix for the Rotation Point represented by the Vertex and the angle 'a'
+func NewRotate(v Vector, a float64) Matrix {
 	v = v.Normalize()
 	s := math.Sin(a)
 	c := math.Cos(a)
@@ -45,18 +48,22 @@ func MatrixRotate(v Vertex, a float64) Matrix {
 		0, 0, 0, 1}
 }
 
-func (m Matrix) Translate(v Vertex) Matrix {
-	return MatrixTranslate(v).Multiply(m)
+// Translate translates the matrix by the supplied vector
+func (m Matrix) Translate(v Vector) Matrix {
+	return NewTranslate(v).Multiply(m)
 }
 
-func (m Matrix) Scale(v Vertex) Matrix {
-	return MatrixScale(v).Multiply(m)
+// Scale scales the matrix by the supplied vector
+func (m Matrix) Scale(v Vector) Matrix {
+	return NewScale(v).Multiply(m)
 }
 
-func (m Matrix) Rotate(v Vertex, f float64) Matrix {
-	return MatrixRotate(v, f).Multiply(m)
+// Rotate rotates the matrix by the supplied vector
+func (m Matrix) Rotate(v Vector, f float64) Matrix {
+	return NewRotate(v, f).Multiply(m)
 }
 
+// Multiply multiplies two matrices
 func (a Matrix) Multiply(b Matrix) Matrix {
 	m := Matrix{}
 	m.x00 = a.x00*b.x00 + a.x01*b.x10 + a.x02*b.x20 + a.x03*b.x30
@@ -78,71 +85,77 @@ func (a Matrix) Multiply(b Matrix) Matrix {
 	return m
 }
 
-func (a Matrix) MulPosition(b Vertex) Vertex {
+// MulPosition multiplies the matrix by the supplied vector
+func (a Matrix) MulPosition(b Vector) Vector {
 	x := a.x00*b.X + a.x01*b.Y + a.x02*b.Z + a.x03
 	y := a.x10*b.X + a.x11*b.Y + a.x12*b.Z + a.x13
 	z := a.x20*b.X + a.x21*b.Y + a.x22*b.Z + a.x23
-	return Vertex{x, y, z}
+	return Vector{x, y, z}
 }
 
-func (a Matrix) MulPositionW(b Vertex) Vertex {
+// MulPositionW multiplies the matrix by a vector with a W field of 1
+func (a Matrix) MulPositionW(b Vector) Vector {
 	x := a.x00*b.X + a.x01*b.Y + a.x02*b.Z + a.x03
 	y := a.x10*b.X + a.x11*b.Y + a.x12*b.Z + a.x13
 	z := a.x20*b.X + a.x21*b.Y + a.x22*b.Z + a.x23
 	w := a.x30*b.X + a.x31*b.Y + a.x32*b.Z + a.x33
-	return Vertex{x / w, y / w, z / w}
+	return Vector{x / w, y / w, z / w}
 }
 
-func (a Matrix) MulDirection(b Vertex) Vertex {
+func (a Matrix) MulDirection(b Vector) Vector {
 	x := a.x00*b.X + a.x01*b.Y + a.x02*b.Z
 	y := a.x10*b.X + a.x11*b.Y + a.x12*b.Z
 	z := a.x20*b.X + a.x21*b.Y + a.x22*b.Z
 
-	v := Vertex{x, y, z}
+	v := Vector{x, y, z}
 	return v.Normalize()
 }
-//
-//func (a Matrix) Transpose() Matrix {
-//	return Matrix{
-//		a.x00, a.x10, a.x20, a.x30,
-//		a.x01, a.x11, a.x21, a.x31,
-//		a.x02, a.x12, a.x22, a.x32,
-//		a.x03, a.x13, a.x23, a.x33}
-//}
-//
-//func (a Matrix) Determinant() float64 {
-//	return (a.x00*a.x11*a.x22*a.x33 - a.x00*a.x11*a.x23*a.x32 +
-//		a.x00*a.x12*a.x23*a.x31 - a.x00*a.x12*a.x21*a.x33 +
-//		a.x00*a.x13*a.x21*a.x32 - a.x00*a.x13*a.x22*a.x31 -
-//		a.x01*a.x12*a.x23*a.x30 + a.x01*a.x12*a.x20*a.x33 -
-//		a.x01*a.x13*a.x20*a.x32 + a.x01*a.x13*a.x22*a.x30 -
-//		a.x01*a.x10*a.x22*a.x33 + a.x01*a.x10*a.x23*a.x32 +
-//		a.x02*a.x13*a.x20*a.x31 - a.x02*a.x13*a.x21*a.x30 +
-//		a.x02*a.x10*a.x21*a.x33 - a.x02*a.x10*a.x23*a.x31 +
-//		a.x02*a.x11*a.x23*a.x30 - a.x02*a.x11*a.x20*a.x33 -
-//		a.x03*a.x10*a.x21*a.x32 + a.x03*a.x10*a.x22*a.x31 -
-//		a.x03*a.x11*a.x22*a.x30 + a.x03*a.x11*a.x20*a.x32 -
-//		a.x03*a.x12*a.x20*a.x31 + a.x03*a.x12*a.x21*a.x30)
-//}
-//
-//func (a Matrix) Inverse() Matrix {
-//	m := Matrix{}
-//	d := a.Determinant()
-//	m.x00 = (a.x12*a.x23*a.x31 - a.x13*a.x22*a.x31 + a.x13*a.x21*a.x32 - a.x11*a.x23*a.x32 - a.x12*a.x21*a.x33 + a.x11*a.x22*a.x33) / d
-//	m.x01 = (a.x03*a.x22*a.x31 - a.x02*a.x23*a.x31 - a.x03*a.x21*a.x32 + a.x01*a.x23*a.x32 + a.x02*a.x21*a.x33 - a.x01*a.x22*a.x33) / d
-//	m.x02 = (a.x02*a.x13*a.x31 - a.x03*a.x12*a.x31 + a.x03*a.x11*a.x32 - a.x01*a.x13*a.x32 - a.x02*a.x11*a.x33 + a.x01*a.x12*a.x33) / d
-//	m.x03 = (a.x03*a.x12*a.x21 - a.x02*a.x13*a.x21 - a.x03*a.x11*a.x22 + a.x01*a.x13*a.x22 + a.x02*a.x11*a.x23 - a.x01*a.x12*a.x23) / d
-//	m.x10 = (a.x13*a.x22*a.x30 - a.x12*a.x23*a.x30 - a.x13*a.x20*a.x32 + a.x10*a.x23*a.x32 + a.x12*a.x20*a.x33 - a.x10*a.x22*a.x33) / d
-//	m.x11 = (a.x02*a.x23*a.x30 - a.x03*a.x22*a.x30 + a.x03*a.x20*a.x32 - a.x00*a.x23*a.x32 - a.x02*a.x20*a.x33 + a.x00*a.x22*a.x33) / d
-//	m.x12 = (a.x03*a.x12*a.x30 - a.x02*a.x13*a.x30 - a.x03*a.x10*a.x32 + a.x00*a.x13*a.x32 + a.x02*a.x10*a.x33 - a.x00*a.x12*a.x33) / d
-//	m.x13 = (a.x02*a.x13*a.x20 - a.x03*a.x12*a.x20 + a.x03*a.x10*a.x22 - a.x00*a.x13*a.x22 - a.x02*a.x10*a.x23 + a.x00*a.x12*a.x23) / d
-//	m.x20 = (a.x11*a.x23*a.x30 - a.x13*a.x21*a.x30 + a.x13*a.x20*a.x31 - a.x10*a.x23*a.x31 - a.x11*a.x20*a.x33 + a.x10*a.x21*a.x33) / d
-//	m.x21 = (a.x03*a.x21*a.x30 - a.x01*a.x23*a.x30 - a.x03*a.x20*a.x31 + a.x00*a.x23*a.x31 + a.x01*a.x20*a.x33 - a.x00*a.x21*a.x33) / d
-//	m.x22 = (a.x01*a.x13*a.x30 - a.x03*a.x11*a.x30 + a.x03*a.x10*a.x31 - a.x00*a.x13*a.x31 - a.x01*a.x10*a.x33 + a.x00*a.x11*a.x33) / d
-//	m.x23 = (a.x03*a.x11*a.x20 - a.x01*a.x13*a.x20 - a.x03*a.x10*a.x21 + a.x00*a.x13*a.x21 + a.x01*a.x10*a.x23 - a.x00*a.x11*a.x23) / d
-//	m.x30 = (a.x12*a.x21*a.x30 - a.x11*a.x22*a.x30 - a.x12*a.x20*a.x31 + a.x10*a.x22*a.x31 + a.x11*a.x20*a.x32 - a.x10*a.x21*a.x32) / d
-//	m.x31 = (a.x01*a.x22*a.x30 - a.x02*a.x21*a.x30 + a.x02*a.x20*a.x31 - a.x00*a.x22*a.x31 - a.x01*a.x20*a.x32 + a.x00*a.x21*a.x32) / d
-//	m.x32 = (a.x02*a.x11*a.x30 - a.x01*a.x12*a.x30 - a.x02*a.x10*a.x31 + a.x00*a.x12*a.x31 + a.x01*a.x10*a.x32 - a.x00*a.x11*a.x32) / d
-//	m.x33 = (a.x01*a.x12*a.x20 - a.x02*a.x11*a.x20 + a.x02*a.x10*a.x21 - a.x00*a.x12*a.x21 - a.x01*a.x10*a.x22 + a.x00*a.x11*a.x22) / d
-//	return m
-//}
+
+// Transpose transpose the matrix swapping values along the identity axis
+func (a Matrix) Transpose() Matrix {
+	return Matrix{
+		a.x00, a.x10, a.x20, a.x30,
+		a.x01, a.x11, a.x21, a.x31,
+		a.x02, a.x12, a.x22, a.x32,
+		a.x03, a.x13, a.x23, a.x33}
+}
+
+func (a Matrix) Determinant() float64 {
+	return (a.x00 * a.x11 * a.x22 * a.x33 - a.x00 * a.x11 * a.x23 * a.x32 +
+		a.x00 * a.x12 * a.x23 * a.x31 - a.x00 * a.x12 * a.x21 * a.x33 +
+		a.x00 * a.x13 * a.x21 * a.x32 - a.x00 * a.x13 * a.x22 * a.x31 -
+		a.x01 * a.x12 * a.x23 * a.x30 + a.x01 * a.x12 * a.x20 * a.x33 -
+		a.x01 * a.x13 * a.x20 * a.x32 + a.x01 * a.x13 * a.x22 * a.x30 -
+		a.x01 * a.x10 * a.x22 * a.x33 + a.x01 * a.x10 * a.x23 * a.x32 +
+		a.x02 * a.x13 * a.x20 * a.x31 - a.x02 * a.x13 * a.x21 * a.x30 +
+		a.x02 * a.x10 * a.x21 * a.x33 - a.x02 * a.x10 * a.x23 * a.x31 +
+		a.x02 * a.x11 * a.x23 * a.x30 - a.x02 * a.x11 * a.x20 * a.x33 -
+		a.x03 * a.x10 * a.x21 * a.x32 + a.x03 * a.x10 * a.x22 * a.x31 -
+		a.x03 * a.x11 * a.x22 * a.x30 + a.x03 * a.x11 * a.x20 * a.x32 -
+		a.x03 * a.x12 * a.x20 * a.x31 + a.x03 * a.x12 * a.x21 * a.x30)
+}
+
+
+// Inverse returns the inverse of a matrix.
+// In that point A*M=B then B*Inverse(M)=A
+func (a Matrix) Inverse() Matrix {
+	m := Matrix{}
+	d := a.Determinant()
+	m.x00 = (a.x12 * a.x23 * a.x31 - a.x13 * a.x22 * a.x31 + a.x13 * a.x21 * a.x32 - a.x11 * a.x23 * a.x32 - a.x12 * a.x21 * a.x33 + a.x11 * a.x22 * a.x33) / d
+	m.x01 = (a.x03 * a.x22 * a.x31 - a.x02 * a.x23 * a.x31 - a.x03 * a.x21 * a.x32 + a.x01 * a.x23 * a.x32 + a.x02 * a.x21 * a.x33 - a.x01 * a.x22 * a.x33) / d
+	m.x02 = (a.x02 * a.x13 * a.x31 - a.x03 * a.x12 * a.x31 + a.x03 * a.x11 * a.x32 - a.x01 * a.x13 * a.x32 - a.x02 * a.x11 * a.x33 + a.x01 * a.x12 * a.x33) / d
+	m.x03 = (a.x03 * a.x12 * a.x21 - a.x02 * a.x13 * a.x21 - a.x03 * a.x11 * a.x22 + a.x01 * a.x13 * a.x22 + a.x02 * a.x11 * a.x23 - a.x01 * a.x12 * a.x23) / d
+	m.x10 = (a.x13 * a.x22 * a.x30 - a.x12 * a.x23 * a.x30 - a.x13 * a.x20 * a.x32 + a.x10 * a.x23 * a.x32 + a.x12 * a.x20 * a.x33 - a.x10 * a.x22 * a.x33) / d
+	m.x11 = (a.x02 * a.x23 * a.x30 - a.x03 * a.x22 * a.x30 + a.x03 * a.x20 * a.x32 - a.x00 * a.x23 * a.x32 - a.x02 * a.x20 * a.x33 + a.x00 * a.x22 * a.x33) / d
+	m.x12 = (a.x03 * a.x12 * a.x30 - a.x02 * a.x13 * a.x30 - a.x03 * a.x10 * a.x32 + a.x00 * a.x13 * a.x32 + a.x02 * a.x10 * a.x33 - a.x00 * a.x12 * a.x33) / d
+	m.x13 = (a.x02 * a.x13 * a.x20 - a.x03 * a.x12 * a.x20 + a.x03 * a.x10 * a.x22 - a.x00 * a.x13 * a.x22 - a.x02 * a.x10 * a.x23 + a.x00 * a.x12 * a.x23) / d
+	m.x20 = (a.x11 * a.x23 * a.x30 - a.x13 * a.x21 * a.x30 + a.x13 * a.x20 * a.x31 - a.x10 * a.x23 * a.x31 - a.x11 * a.x20 * a.x33 + a.x10 * a.x21 * a.x33) / d
+	m.x21 = (a.x03 * a.x21 * a.x30 - a.x01 * a.x23 * a.x30 - a.x03 * a.x20 * a.x31 + a.x00 * a.x23 * a.x31 + a.x01 * a.x20 * a.x33 - a.x00 * a.x21 * a.x33) / d
+	m.x22 = (a.x01 * a.x13 * a.x30 - a.x03 * a.x11 * a.x30 + a.x03 * a.x10 * a.x31 - a.x00 * a.x13 * a.x31 - a.x01 * a.x10 * a.x33 + a.x00 * a.x11 * a.x33) / d
+	m.x23 = (a.x03 * a.x11 * a.x20 - a.x01 * a.x13 * a.x20 - a.x03 * a.x10 * a.x21 + a.x00 * a.x13 * a.x21 + a.x01 * a.x10 * a.x23 - a.x00 * a.x11 * a.x23) / d
+	m.x30 = (a.x12 * a.x21 * a.x30 - a.x11 * a.x22 * a.x30 - a.x12 * a.x20 * a.x31 + a.x10 * a.x22 * a.x31 + a.x11 * a.x20 * a.x32 - a.x10 * a.x21 * a.x32) / d
+	m.x31 = (a.x01 * a.x22 * a.x30 - a.x02 * a.x21 * a.x30 + a.x02 * a.x20 * a.x31 - a.x00 * a.x22 * a.x31 - a.x01 * a.x20 * a.x32 + a.x00 * a.x21 * a.x32) / d
+	m.x32 = (a.x02 * a.x11 * a.x30 - a.x01 * a.x12 * a.x30 - a.x02 * a.x10 * a.x31 + a.x00 * a.x12 * a.x31 + a.x01 * a.x10 * a.x32 - a.x00 * a.x11 * a.x32) / d
+	m.x33 = (a.x01 * a.x12 * a.x20 - a.x02 * a.x11 * a.x20 + a.x02 * a.x10 * a.x21 - a.x00 * a.x12 * a.x21 - a.x01 * a.x10 * a.x22 + a.x00 * a.x11 * a.x22) / d
+	return m
+}
