@@ -10,7 +10,7 @@ var (
 	APPROX_LIMIT float64 = 	0.00000000001
 )
 
-// Vertex represents a point in 3d space
+// Vector represents a point in 3d space
 type Vector struct {
 	X, Y, Z float64
 }
@@ -50,14 +50,14 @@ func (v *Vector) DotProduct(other Vector) float64 {
 }
 
 // Normalize returns a resized vector within a unit of 1, keeping the direction of the original vector
-func (v *Vector) Normalize() Vector {
+func (v Vector) Normalize() Vector {
 	l := v.Length()
 	if l == 0 {
 		return Vector{}
 	}
 	if l <= 1 {
 		// no need to normalise
-		return *v
+		return v
 	}
 	il := 1 / l
 	return Vector{v.X * il, v.Y * il, v.Z * il}
@@ -110,10 +110,10 @@ func (v *Vector) ApproxEqual(o Vector) bool {
 }
 
 // MidPointTo returns the vector that represents the point half way between the two vectors
-func (v*Vector) MidPointTo(o Vector) Vector {
-	relative := o.Subtract(*v) // calculate o relative to v
+func (v Vector) MidPointTo(o Vector) Vector {
+	relative := o.Subtract(v) // calculate o relative to v
 	mp := relative.DivideScalar(2.0) // find half way point
-	return mp.Add(*v) // translate back again
+	return mp.Add(v) // translate back again
 }
 
 func (v *Vector) String() string {

@@ -40,12 +40,10 @@ func (v *Viewport) CalcTransformation() {
 func (v *Viewport) Rasterize(scene *Scene) {
 	for _, m := range scene.Meshes {
 		for _, p := range m.Polygons {
-			for i, ov := range p.Vertices {
-				log.Printf("O %v %v", i, ov)
-				wv := scene.WorldTransformation.MulPositionW(*ov)
-				log.Printf("W %v %v", i, wv)
+			for _, index := range p.Indexes {
+				vertex := m.getVertex(index)
+				wv := scene.WorldTransformation.MulPositionW(vertex)
 				vv := v.Transformation.MulPositionW(wv)
-				log.Printf("V %v %v", i, vv)
 				x := int(vv.X)
 				y := int(vv.Y)
 				if x >= 0 && x < v.Width && y >= 0 && y < v.Height {
@@ -81,7 +79,7 @@ func (v *Viewport) RenderPng(filename string) {
 	}
 }
 
-func (v *Viewport) RenderSvg(scene *Scene, filename string) {
+func (v *Viewport) RenderSvg(scene *Scene, filename string, level int) {
 	f, err := os.OpenFile(filename, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0666)
 	if err != nil {
 		panic(err)
@@ -94,18 +92,16 @@ func (v *Viewport) RenderSvg(scene *Scene, filename string) {
 	w.WriteString(fmt.Sprintf("<svg width=\"%v\" height=\"%v\" version=\"1.1\" baseProfile=\"full\" xmlns=\"http://www.w3.org/2000/svg\">", v.Width, v.Height))
 	w.WriteString(fmt.Sprintf("<g transform=\"translate(0,%v) scale(1,-1)\">", v.Height))
 	for _, m := range scene.Meshes {
+
 		for _, p := range m.Polygons {
 			var pl []string
-			for i, ov := range p.Vertices {
-				log.Printf("O %v %v", i, ov)
-				wv := scene.WorldTransformation.MulPositionW(*ov)
-				log.Printf("W %v %v", i, wv)
+			for _, index := range p.Indexes {
+				ov := m.getVertex(index)
+				wv := scene.WorldTransformation.MulPositionW(ov)
 				vv := v.Transformation.MulPositionW(wv)
-				log.Printf("V %v %v", i, vv)
 				pl = append(pl, fmt.Sprintf("%v,%v ", vv.X, vv.Y))
 			}
 			coords := strings.Join(pl, " ")
-			fmt.Println(coords)
 			w.WriteString(fmt.Sprintf("<polyline stroke=\"black\" fill=\"blue\" fill-opacity=\"0.5\" points=\"%v\" />", coords))
 		}
 	}

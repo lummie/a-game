@@ -6,6 +6,7 @@ type Mesh struct {
 	Vertices            Vectors
 	Polygons            Polygons
 	WorldTransformation Matrix
+	Meshes              Meshes
 }
 
 type Meshes []*Mesh
@@ -19,28 +20,39 @@ func NewMesh(vertexCapacity, polygonCapacity int) *Mesh {
 	return &g
 }
 
+func (m *Mesh) AddMesh(nm *Mesh) {
+	m.Meshes = append(m.Meshes, nm)
+}
+
 // AddVertex adds one or more vertices to the object
-func (g *Mesh) AddVertex(vertices ...Vector) {
+func (m *Mesh) AddVertex(vertices ...Vector) {
 	for _, v := range (vertices) {
-		g.Vertices = append(g.Vertices, v)
+		m.Vertices = append(m.Vertices, v)
 	}
 }
 
-// AddFace adds a new face to the object using the specified vertices' indexes
-func (g *Mesh) AddPolygon(indexes ...int) {
+// AddPolygon adds a new face to the object using the specified vertices' indexes
+func (m *Mesh) AddPolygon(indexes ...int) *Polygon {
 	p := NewPolygon(len(indexes))
 	for _, v := range indexes {
-		p.AddVertex(&g.Vertices[v])
+		p.AddIndex(v)
 	}
-	g.Polygons = append(g.Polygons, p)
+	m.Polygons = append(m.Polygons, p)
+	return &p
 }
 
-func (g *Mesh) String() string {
-	return fmt.Sprintf("vertices:%+v faces:%+v", g.Vertices, g.Polygons)
+func (m *Mesh) String() string {
+	return fmt.Sprintf("vertices:%+v faces:%+v", m.Vertices, m.Polygons)
 }
 
-func (g *Mesh) Normalize() {
-	for i := range g.Vertices {
-		g.Vertices[i] = g.Vertices[i].Normalize()
+func (m *Mesh) Normalize() {
+	for i := range m.Vertices {
+		m.Vertices[i] = m.Vertices[i].Normalize()
 	}
 }
+
+func (m *Mesh) getVertex(index int) Vector {
+	return m.Vertices[index]
+}
+
+

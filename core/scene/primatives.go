@@ -3,7 +3,7 @@ package scene
 import "math"
 
 func NewCube(w, h, d float64) *Mesh {
-	m := Mesh{}
+	m := NewMesh(8, 6)
 	m.AddVertex(
 		Vector{-w, -h, -d},
 		Vector{-w, +h, -d},
@@ -20,15 +20,15 @@ func NewCube(w, h, d float64) *Mesh {
 	m.AddPolygon(3, 2, 6, 7)
 	m.AddPolygon(1, 5, 6, 2)
 	m.AddPolygon(4, 0, 3, 7)
-	return &m
+	return m
 }
 
 // NewTriangle returns a new triangle based on the three supplied vectors
 func NewTriangle(v1, v2, v3 Vector) *Mesh {
-	m := Mesh{}
+	m := NewMesh(3, 1)
 	m.AddVertex(v1, v2, v3)
 	m.AddPolygon(0, 1, 2)
-	return &m
+	return m
 }
 
 // NewTriangleF returns a new triangle from 9 float values representing the x,y & z of each vertex
@@ -36,9 +36,9 @@ func NewTriangleF(x1, y1, z1, x2, y2, z2, x3, y3, z3 float64) *Mesh {
 	return NewTriangle(Vector{x1, y1, z1}, Vector{x2, y2, z2}, Vector{x3, y3, z3})
 }
 
-func NewIcosphere() *Mesh {
+func NewIcosphere(detailLevel int) *Mesh {
 	t := (1.0 + math.Sqrt(5.0)) / 2.0
-	m := Mesh{}
+	m := NewMesh(12, 20)
 	m.AddVertex(Vector{-1, t, 0})
 	m.AddVertex(Vector{1, t, 0})
 	m.AddVertex(Vector{-1, -t, 0})
@@ -53,6 +53,7 @@ func NewIcosphere() *Mesh {
 	m.AddVertex(Vector{t, 0, 1})
 	m.AddVertex(Vector{-t, 0, -1})
 	m.AddVertex(Vector{-t, 0, 1})
+
 
 	// 5 faces around point 0
 	m.AddPolygon(0, 11, 5)
@@ -82,5 +83,36 @@ func NewIcosphere() *Mesh {
 	m.AddPolygon(8, 6, 7)
 	m.AddPolygon(9, 8, 1)
 
-	return &m
+	currentMesh := m
+	for i := 0; i < detailLevel; i++ {
+		detailMesh := NewMesh(6, 4)
+		o := 0 // offset
+		for _, p := range (currentMesh.Polygons) {
+			i1 := p.Indexes[0]
+			i2 := p.Indexes[1]
+			i3 := p.Indexes[2]
+			a := currentMesh.getVertex(i1).MidPointTo(currentMesh.getVertex(i2))
+			b := currentMesh.getVertex(i2).MidPointTo(currentMesh.getVertex(i3))
+			c := currentMesh.getVertex(i3).MidPointTo(currentMesh.getVertex(i1))
+			// map to sphere
+			detailMesh.AddVertex(currentMesh.getVertex(i1).Normalize(), currentMesh.getVertex(i2).Normalize(), currentMesh.getVertex(i3).Normalize(), a.Normalize(), b.Normalize(), c.Normalize())
+			detailMesh.AddPolygon(o + 0, o + 3, o + 5)
+			detailMesh.AddPolygon(o + 1, o + 4, o + 3)
+			detailMesh.AddPolygon(o + 2, o + 5, o + 4)
+			detailMesh.AddPolygon(o + 3, o + 4, o + 5)
+			o = o + 6
+		}
+		currentMesh = detailMesh
+	}
+
+	// copy last mesh to the result mes
+	resultMesh := NewMesh(len(currentMesh.Vertices), len(currentMesh.Polygons))
+	for _, v := range (currentMesh.Vertices) {
+		resultMesh.AddVertex(v)
+	}
+	for _, p := range (currentMesh.Polygons) {
+		resultMesh.AddPolygon(p.Indexes...)
+	}
+
+	return resultMesh
 }

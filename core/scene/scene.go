@@ -10,7 +10,7 @@ type Scene struct {
 func NewScene(c int) *Scene {
 	s := Scene{
 		Meshes:make(Meshes, 0, c),
-		WorldTransformation: NewScale(Vector{50.0, 50.0, 50.0}),
+		WorldTransformation: NewScale(Vector{150.0, 150.0, 150.0}),
 	}
 	return &s
 }
