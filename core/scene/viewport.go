@@ -8,6 +8,7 @@ import (
 	"log"
 	"bufio"
 	"fmt"
+	"strings"
 )
 
 type Viewport struct {
@@ -81,7 +82,7 @@ func (v *Viewport) RenderPng(filename string) {
 }
 
 func (v *Viewport) RenderSvg(scene *Scene, filename string) {
-	f, err := os.OpenFile(filename, os.O_CREATE | os.O_WRONLY, 0666)
+	f, err := os.OpenFile(filename, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -101,11 +102,11 @@ func (v *Viewport) RenderSvg(scene *Scene, filename string) {
 				log.Printf("W %v %v", i, wv)
 				vv := v.Transformation.MulPositionW(wv)
 				log.Printf("V %v %v", i, vv)
-				//x := int(vv.X)
-				//y := int(vv.Y)
 				pl = append(pl, fmt.Sprintf("%v,%v ", vv.X, vv.Y))
 			}
-			w.WriteString(fmt.Sprintf("<polyline stroke=\"black\" fill=\"none\" points=\"%v\" />", pl))
+			coords := strings.Join(pl, " ")
+			fmt.Println(coords)
+			w.WriteString(fmt.Sprintf("<polyline stroke=\"black\" fill=\"blue\" fill-opacity=\"0.5\" points=\"%v\" />", coords))
 		}
 	}
 	w.WriteString("</g></svg>")

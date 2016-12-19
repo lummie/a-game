@@ -29,8 +29,8 @@ func (g *Mesh) AddVertex(vertices ...Vector) {
 // AddFace adds a new face to the object using the specified vertices' indexes
 func (g *Mesh) AddPolygon(indexes ...int) {
 	p := NewPolygon(len(indexes))
-	for i := range indexes {
-		p.AddVertex(&g.Vertices[i])
+	for _, v := range indexes {
+		p.AddVertex(&g.Vertices[v])
 	}
 	g.Polygons = append(g.Polygons, p)
 }
