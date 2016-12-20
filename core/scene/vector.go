@@ -100,7 +100,8 @@ func (v *Vector) MultiplyScalar(f float64) Vector {
 
 // DivideScalar divides each dimension or the vector by the float value
 func (v *Vector) DivideScalar(f float64) Vector {
-	return Vector{v.X / f, v.Y / f, v.Z / f }
+	r := 1 / f
+	return Vector{v.X * r, v.Y * r, v.Z * r}
 }
 
 // Equals returns true if the vectors are equal

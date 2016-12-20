@@ -1,6 +1,8 @@
 package scene
 
-import "math"
+import (
+	"math"
+)
 
 func NewCube(w, h, d float64) *Mesh {
 	m := NewMesh(8, 6)
@@ -83,6 +85,11 @@ func NewIcosphere(detailLevel int) *Mesh {
 	m.AddPolygon(8, 6, 7)
 	m.AddPolygon(9, 8, 1)
 
+	onSphere := func(v Vector) Vector {
+		l := math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z)
+		return Vector{v.X / l, v.Y / l, v.Z / l}
+	}
+
 	currentMesh := m
 	for i := 0; i < detailLevel; i++ {
 		detailMesh := NewMesh(6, 4)
@@ -95,7 +102,8 @@ func NewIcosphere(detailLevel int) *Mesh {
 			b := currentMesh.getVertex(i2).MidPointTo(currentMesh.getVertex(i3))
 			c := currentMesh.getVertex(i3).MidPointTo(currentMesh.getVertex(i1))
 			// map to sphere
-			detailMesh.AddVertex(currentMesh.getVertex(i1).Normalize(), currentMesh.getVertex(i2).Normalize(), currentMesh.getVertex(i3).Normalize(), a.Normalize(), b.Normalize(), c.Normalize())
+			detailMesh.AddVertex(onSphere(currentMesh.getVertex(i1)), onSphere(currentMesh.getVertex(i2)),
+				onSphere(currentMesh.getVertex(i3)), onSphere(a), onSphere(b), onSphere(c))
 			detailMesh.AddPolygon(o + 0, o + 3, o + 5)
 			detailMesh.AddPolygon(o + 1, o + 4, o + 3)
 			detailMesh.AddPolygon(o + 2, o + 5, o + 4)

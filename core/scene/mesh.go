@@ -6,7 +6,6 @@ type Mesh struct {
 	Vertices            Vectors
 	Polygons            Polygons
 	WorldTransformation Matrix
-	Meshes              Meshes
 }
 
 type Meshes []*Mesh
@@ -18,10 +17,6 @@ func NewMesh(vertexCapacity, polygonCapacity int) *Mesh {
 		Polygons : make(Polygons, 0, polygonCapacity),
 	}
 	return &g
-}
-
-func (m *Mesh) AddMesh(nm *Mesh) {
-	m.Meshes = append(m.Meshes, nm)
 }
 
 // AddVertex adds one or more vertices to the object
