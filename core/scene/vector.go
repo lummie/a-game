@@ -120,3 +120,8 @@ func (v Vector) MidPointTo(o Vector) Vector {
 func (v *Vector) String() string {
 	return fmt.Sprintf("x:%v y:%v z:%v", v.X, v.Y, v.Z)
 }
+
+func (v Vector) Round(dp int) Vector {
+	return Vector{RoundUp(v.X, dp), RoundUp(v.Y, dp), RoundUp(v.Z, dp)}
+}
+

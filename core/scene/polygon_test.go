@@ -8,8 +8,8 @@ import (
 func TestNewPolygon(t *testing.T) {
 	p := scene.NewPolygon(1)
 
-	if len(p.Vertices) != 0 {
-		t.Error("Expected Polygon Vertices to number zero")
+	if len(p.Indexes) != 0 {
+		t.Error("Expected Polygon Indexes to number zero")
 	}
 }
 
@@ -17,33 +17,28 @@ func TestNewPolygon(t *testing.T) {
 func TestPolygon_AddVertex(t *testing.T) {
 	p := scene.NewPolygon(1)
 
-	if len(p.Vertices) != 0 {
-		t.Error("Expected Polygon Vertices to number zero")
+	if len(p.Indexes) != 0 {
+		t.Error("Expected Polygon Indexes to number zero")
 	}
 
-	p.AddVertex(&scene.Vector{1.0,2.0,3.0})
-	if len(p.Vertices) != 1 {
-		t.Error("Expected Polygon Vertices to have 1 vertex")
-	}
-	if p.Vertices[0].X != 1.0 ||
-		p.Vertices[0].Y != 2.0 ||
-		p.Vertices[0].Z != 3.0 {
-		t.Errorf("Expected vertices zero to be 1,2,3 and got %v", p.Vertices[0])
+	p.AddIndex(10)
+	if len(p.Indexes) != 1 {
+		t.Error("Expected Polygon Indexes to have 1 vertex")
 	}
 
-	p.AddVertex(&scene.Vector{4.0,5.0,6.0})
-	if len(p.Vertices) != 2 {
-		t.Error("Expected Polygon Vertices to have 2 vertices")
+	if p.Indexes[0] != 10 {
+		t.Errorf("Expected Index[0] to be 10 got %v", p.Indexes[0])
 	}
-	if p.Vertices[0].X != 1.0 ||
-		p.Vertices[0].Y != 2.0 ||
-		p.Vertices[0].Z != 3.0 {
-		t.Errorf("Expected vertices zero to be 1,2,3 and got %v", p.Vertices[0])
+
+	p.AddIndex(11)
+	if len(p.Indexes) != 2 {
+		t.Error("Expected Polygon Indexes to have 2 vertices")
 	}
-	if p.Vertices[1].X != 4.0 ||
-		p.Vertices[1].Y != 5.0 ||
-		p.Vertices[1].Z != 6.0 {
-		t.Errorf("EXpected vertices ONE to be 4,5,6 and got %v", p.Vertices[1])
+	if p.Indexes[0] != 10 {
+		t.Errorf("Expected Index[0] to be 10 got %v", p.Indexes[0])
+	}
+	if p.Indexes[1] != 11 {
+		t.Errorf("Expected Index[0] to be 10 got %v", p.Indexes[0])
 	}
 
 }

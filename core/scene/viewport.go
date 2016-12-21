@@ -79,7 +79,7 @@ func (v *Viewport) RenderPng(filename string) {
 	}
 }
 
-func (v *Viewport) RenderSvg(scene *Scene, filename string, level int) {
+func (v *Viewport) RenderSvg(scene *Scene, filename string) {
 	f, err := os.OpenFile(filename, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0666)
 	if err != nil {
 		panic(err)
@@ -102,8 +102,36 @@ func (v *Viewport) RenderSvg(scene *Scene, filename string, level int) {
 				pl = append(pl, fmt.Sprintf("%v,%v ", vv.X, vv.Y))
 			}
 			coords := strings.Join(pl, " ")
-			w.WriteString(fmt.Sprintf("<polyline stroke=\"black\" fill=\"blue\" fill-opacity=\"0.5\" points=\"%v\" />", coords))
+			w.WriteString(fmt.Sprintf("<polyline stroke=\"black\" fill=\"green\" fill-opacity=\"0.5\" points=\"%v\" />", coords))
 		}
 	}
 	w.WriteString("</g></svg>")
+}
+
+func (v *Viewport) RenderPolygonsToCSV(scene *Scene, filename string) {
+	f, err := os.OpenFile(filename, os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	defer w.Flush()
+
+	w.WriteString("polygonID,vectorNo,x,y,z,latitude,longitude\n")
+
+	id := 0
+	for _, m := range scene.Meshes {
+		for _, p := range m.Polygons {
+			for vNo, index := range p.Indexes {
+				ov := m.getVertex(index)
+				//wv := scene.WorldTransformation.MulPositionW(ov)
+				//vv := v.Transformation.MulPositionW(wv)
+				w.WriteString(fmt.Sprintf("P%v,%v,%v,%v,%v,", id, vNo, ov.X, ov.Y, ov.Z))
+				geo := GoeLocationFromVector(ov)
+				w.WriteString(fmt.Sprintf("%v,%v\n", geo.lat, geo.long))
+			}
+			id ++
+		}
+	}
 }

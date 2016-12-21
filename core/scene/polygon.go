@@ -17,8 +17,8 @@ func NewPolygon(capacity int) Polygon {
 }
 
 // AddVertex adds a new vertex to the face
-func (f *Polygon) AddIndex(i int) {
-	f.Indexes = append(f.Indexes, i)
+func (p *Polygon) AddIndex(i int) {
+	p.Indexes = append(p.Indexes, i)
 }
 
 // Polygon holds a list of faces
