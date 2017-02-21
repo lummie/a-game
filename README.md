@@ -1,5 +1,4 @@
 # a-game
-Nothing to see here, move along
 
 The start of a game written in Go.  
 Currently allows creation of a 3d scene specifically to render a icohedron
