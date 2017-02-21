@@ -27,5 +27,5 @@ _testmain.go
 *.iws
 *.iml
 
-/*.csv
-/*.svg
+*.csv
+#*.svg
