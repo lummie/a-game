@@ -2,7 +2,7 @@ package scene_test
 
 import (
 	"testing"
-	"project69/core/scene"
+	"github.com/lummie/a-game/core/scene"
 )
 
 func TestVertex_ApproxEqual(t *testing.T) {

@@ -1,8 +1,6 @@
 package main
 
-import (
-	"project69/core/scene"
-)
+import "github.com/lummie/a-game/core/scene"
 
 func main(){
 	s := scene.NewScene(1)
